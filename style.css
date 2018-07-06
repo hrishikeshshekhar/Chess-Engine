@@ -1,0 +1,15 @@
+.container
+{
+  width: 60%;
+  display: inline-block;
+  padding: 10% 0% 10% 10%;
+  float: left;
+}
+.dialog
+{
+  width: 25%;
+  background-color: rgb(255, 0, 0);
+  padding: 10% 0% 10% 5%;
+  display: inline-block;
+  float: left;
+}
