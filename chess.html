@@ -7,21 +7,31 @@
     <script src="render.js" type="text/javascript"> </script>
     <link rel="stylesheet" href="css\chessboard-0.3.0.css" type="text/css"/>
     <link rel="stylesheet" href="style.css" type="text/css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body onload="setup()">
     <canvas> </canvas>
     <div id="container" class="container">
-      <div id="board" style="width: 600px"></div>
+      <div id="board" style="width: 700px"></div>
     </div>
     <div id="dialog" class="dialog">
       <div class="heading">
-        <h1 id="player"> White to play</h1>
-        <p> Last Move : <span  id="move"> </span> </p>
-      </div>
-      <div class="buttoncontainer">
-        <button onclick="restart()"> Restart </button>
-        <button onclick="undo()"> Undo </button>
-        <button onclick="hint()"> Hint </button>
+        <h1 id="player" class="header"> White to play</h1>
+        <p class="text"> Last Move : <span  id="move" class="spanner"> </span> </p>
+        <p class="text"> Hint :      <span id="hint" class="spanner"> </span> </p>
+        <p class="text"> Total Moves Searched:  <span id="movessearched" class="spanner"> </span> </p>
+        <div class="buttoncontainer">
+          <div class="button">
+            <p onclick="restart()"> Restart </p>
+          </div>
+          <div class="button">
+            <p onclick="hint()"> Hint </p>
+          </div>
+          <div class="button">
+            <p onclick="undo()"> Undo </p>
+          </div>
+        </div>
       </div>
     </div>
   </body>

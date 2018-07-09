@@ -6,6 +6,11 @@ var board;
 var config;
 var totalmoves;
 var treedepth;
+var movessearched;
+var dialog;
+
+//Variable to know if the user is in the menu
+var inmenu = true;
 
 //Variable to keep track of 1 or 2 players
 var noplayers;
@@ -84,6 +89,7 @@ var kingvalue = [
 function setup()
 {
   totalmoves = 0;
+  movessearched = 1;
   outoftime = false;
   treedepth = 4;
   engine = new Chess();
@@ -101,6 +107,11 @@ function setup()
     snapbackSpeed: 500,
     snapSpeed: 100
   }
+
+  //Removing the dialog box
+  var body = document.querySelector('body');
+  dialog = document.getElementById('dialog');
+  body.removeChild(dialog);
 
   //Calling the menu
   menu();
@@ -130,6 +141,7 @@ function drop(source, target, piece, orientation)
   //If our move is legal
   else
   {
+
     //For 1 player
     if(noplayers === 1)
     {
@@ -142,20 +154,71 @@ function drop(source, target, piece, orientation)
       }
       else
       {
+        //Writing last move
         moved.innerHTML = 'From: ' + move.from + ', To: ' + move.to;
         player.innerHTML = "White to play";
+
+        //Checking if in check
+        if(engine.in_check())
+        {
+          moved.innerHTML = 'In check';
+        }
+
+        //Checking if in checkmate
+        else if(engine.in_checkmate())
+        {
+          moved.innerHTML = 'Checkmate!';
+        }
+
+        //Checking if in stalemate
+        else if(engine.in_draw())
+        {
+          moved.innerHTML = 'In draw';
+        }
+
+        //Checks if in 3 fold repetetion
+        else if(engine.in_threefold_repetition())
+        {
+          moved.innerHTML = 'In 3 fold repetition';
+        }
+
         setTimeout(play, 200);
       }
     }
 
     //For 2 players
-    if(noplayers === 2)
+    else if(noplayers === 2)
     {
       //If it's white's turn to play
       if(legal.color === 'w')
       {
         moved.innerHTML = 'From: ' + move.from + ', To: ' + move.to;
         player.innerHTML = "Black to play";
+
+        //Checking if in check
+        if(engine.in_check())
+        {
+          moved.innerHTML = 'In check';
+        }
+
+        //Checking if in checkmate
+        else if(engine.in_checkmate())
+        {
+          moved.innerHTML = 'Checkmate!';
+        }
+
+        //Checking if in stalemate
+        else if(engine.in_draw())
+        {
+          moved.innerHTML = 'In draw';
+        }
+
+        //Checks if in 3 fold repetetion
+        else if(engine.in_threefold_repetition())
+        {
+          moved.innerHTML = 'In 3 fold repetition';
+        }
+
       }
 
       //If it's black's turn to play
@@ -163,6 +226,31 @@ function drop(source, target, piece, orientation)
       {
         moved.innerHTML = 'From: ' + move.from + ', To: ' + move.to;
         player.innerHTML = "White to play";
+
+        //Checking if in check
+        if(engine.in_check())
+        {
+          moved.innerHTML = 'In check';
+        }
+
+        //Checking if in checkmate
+        else if(engine.in_checkmate())
+        {
+          moved.innerHTML = 'Checkmate!';
+        }
+
+        //Checking if in stalemate
+        else if(engine.in_draw())
+        {
+          moved.innerHTML = 'In draw';
+        }
+
+        //Checks if in 3 fold repetetion
+        else if(engine.in_threefold_repetition())
+        {
+          moved.innerHTML = 'In 3 fold repetition';
+        }
+
       }
     }
   }
@@ -291,15 +379,42 @@ function play()
     var moves = engine.moves();
     totalmoves = 0;
     totalmovesk = 0;
+    movessearched = 1;
 
     //Finding best move
     var bestmove;
     var temp = findbest(treedepth , true, -100000, 100000);
 
     var move = document.getElementById('move');
+    var searched = document.getElementById('movessearched');
+    searched.innerHTML = movessearched;
     var player = document.getElementById('player');
     move.innerHTML = temp.move;
     player.innerHTML = "Black to play";
+
+    //Checking if in checkmate
+    if(engine.in_checkmate())
+    {
+      moved.innerHTML = 'Checkmate';
+    }
+
+    //Checking if in check
+    else if(engine.in_check())
+    {
+      moved.innerHTML = 'In check';
+    }
+
+    //Checking if in stalemate
+    else if(engine.in_draw())
+    {
+      moved.innerHTML = 'Stalemate';
+    }
+
+    //Checks if in 3 fold repetetion
+    else if(engine.in_threefold_repetition())
+    {
+      moved.innerHTML = 'Stalemate due to 3 fold repetition';
+    }
 
 
     bestmove = temp;
@@ -308,7 +423,6 @@ function play()
     engine.move(bestmove.move);
     config.position = getfen(engine.fen());
     board = ChessBoard('board', config);
-
   }
   else if(engine.game_over() === true)
   {
@@ -353,6 +467,12 @@ function findbest(depth, Maxplayer, alpha, beta)
       var best = -100000;
       var bestindex = -1;
       var moves = engine.moves();
+
+      //Evaluating moves searched approximately
+      if(totalmoves === 0)
+      {
+        movessearched *= moves.length;
+      }
 
       //Ordering moves by killer heuristic
       moves = ordermoves(moves);
@@ -406,6 +526,12 @@ function findbest(depth, Maxplayer, alpha, beta)
       var worst = 100000;
       var worstindex = -1;
       var moves = engine.moves();
+
+      //Evaluating moves searched approximately
+      if(totalmoves === 0)
+      {
+        movessearched *= moves.length;
+      }
 
       //Ordering moves by killer heuristic
       moves = ordermoves(moves);
@@ -487,38 +613,30 @@ function menu()
     c.drawImage(image, 0, 0);
 
     //Title
-    c.fillStyle = 'rgba(0, 0, 255)';
-    c.fillRect(510,85, 560, 130);
-    c.fillStyle = 'rgba(255, 255, 255, 0.75)';
-    c.fillRect(540, 100, 500, 100);
+    c.fillStyle = 'rgba(0, 0, 255, 0.1)';
+    c.fillRect(200, 85, 560, 130);
+    //Text
     c.font = "60px Georgia";
     c.fillStyle = 'rgb(255, 0, 120)';
-    c.fillText('Chess Champions', 560, 160);
+    c.fillText('Chess Champions', 230, 160);
 
     //Single Player
     //Outer Rectangle
-    c.fillStyle = 'rgba(0, 0, 255)';
-    c.fillRect(630, 240, 240, 70);
-    //Inner Rectangle
-    c.fillStyle = 'rgba(255, 255, 255, 0.75)';
-    c.fillRect(650, 250, 200, 50);
-    c.font = "35px Georgia";
+    c.fillStyle = 'rgba(0, 0, 255, 0.1)';
+    c.strokeRect(230, 280, 240, 70);
     //Text
+    c.font = "35px Georgia";
     c.fillStyle = 'rgb(255, 0, 120)';
-    c.fillText('Single Player', 650, 280);
+    c.fillText('Single Player', 250 , 330);
 
     //Two Player
-    //Outer Rectangle
-    c.fillStyle = 'rgba(0, 0, 255)';
-    c.fillRect(630, 340, 240, 70);
-    //Inner Rectangle
-    c.fillStyle = 'rgba(255, 255, 255, 0.75)';
-    c.fillRect(650, 350, 200, 50);
-    c.font = "38px Georgia";
-    //Text
-    c.fillStyle = 'rgb(255, 0, 120)';
-    c.fillText('Two Player', 650, 380);
+    c.fillStyle = 'rgba(0, 0, 255, 0.1)';
+    c.strokeRect(230, 380, 240, 70);
 
+    //Text
+    c.font = "35px Georgia";
+    c.fillStyle = 'rgb(255, 0, 120)';
+    c.fillText('Two Player', 250, 430);
   }
 }
 
@@ -526,8 +644,11 @@ function menu()
 function mouseclick(event)
 {
   //Single player
-  if( (event.x > 650 && event.x < 850) && (event.y > 250 && event.y < 300) )
+  if( (event.x > 230 && event.x < 470) && (event.y > 280 && event.y < 350) && (inmenu === true))
   {
+    //Setting inmenu to false
+    inmenu = false;
+
     //Removing the canvas
     var canvas = document.querySelector('canvas');
     var body = document.querySelector('body');
@@ -541,11 +662,18 @@ function mouseclick(event)
 
     //Starting the game
     setTimeout(play, 20);
+
+    //Adding the dialog box
+    var body = document.querySelector('body');
+    body.appendChild(dialog);
   }
 
   //For 2 players
-  else if((event.x > 650 && event.x < 850) && (event.y > 350 && event.y < 400))
+  else if((event.x > 230 && event.x < 470) && (event.y > 380 && event.y < 450) && (inmenu === true))
   {
+    //Setting inmenu to false
+    inmenu = false;
+
     //Removing the canvas
     var canvas = document.querySelector('canvas');
     var body = document.querySelector('body');
@@ -556,6 +684,10 @@ function mouseclick(event)
 
     //Drawing the board
     board  = new ChessBoard('board', config);
+
+    //Adding the dialog box
+    var body = document.querySelector('body');
+    body.appendChild(dialog);
   }
 }
 
@@ -621,6 +753,29 @@ function hint()
     //If it's black's turn to play
     if(engine.turn() === 'b')
     {
+      var hint = findbest(2 , false, -100000, 100000);
+      var hintdata = document.getElementById('hint');
+      hintdata.innerHTML = hint.move;
+    }
+  }
+
+  //For double player
+  else if(noplayers === 2)
+  {
+    if(engine.turn() === 'b')
+    {
+      //If it's black's turn to play
+      var hint = findbest(2 , false, -100000, 100000);
+      var hintdata = document.getElementById('hint');
+      hintdata.innerHTML = hint.move;
+    }
+
+    //If its white's turn to play
+    else if(engine.turn() === 'w')
+    {
+      var hint = findbest(2 , true, -100000, 100000);
+      var hintdata = document.getElementById('hint');
+      hintdata.innerHTML = hint.move;
     }
   }
 }
