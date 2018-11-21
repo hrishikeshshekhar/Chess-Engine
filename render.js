@@ -395,25 +395,25 @@ function play()
     //Checking if in checkmate
     if(engine.in_checkmate())
     {
-      moved.innerHTML = 'Checkmate';
+      move.innerHTML = 'Checkmate';
     }
 
     //Checking if in check
     else if(engine.in_check())
     {
-      moved.innerHTML = 'In check';
+      move.innerHTML = 'In check';
     }
 
     //Checking if in stalemate
     else if(engine.in_draw())
     {
-      moved.innerHTML = 'Stalemate';
+      move.innerHTML = 'Stalemate';
     }
 
     //Checks if in 3 fold repetetion
     else if(engine.in_threefold_repetition())
     {
-      moved.innerHTML = 'Stalemate due to 3 fold repetition';
+      move.innerHTML = 'Stalemate due to 3 fold repetition';
     }
 
 
