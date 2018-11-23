@@ -120,7 +120,13 @@ function setup()
 //Function to be called when user places the piece anywhere
 function drop(source, target, piece, orientation)
 {
-  var move = {
+  //Getting all HTML tags as DOM elements
+  var moved = document.getElementById('move');
+  var player = document.getElementById('player');
+
+  //Creating the move object
+  var move = 
+  {
     from: source,
     to: target,
     promotion: 'q'
@@ -128,8 +134,6 @@ function drop(source, target, piece, orientation)
 
   //Check if the move is legal
   var legal = engine.move(move);
-  var moved = document.getElementById('move');
-  var player = document.getElementById('player');
 
   //If our move is illegal
   if(legal === null)
@@ -152,6 +156,7 @@ function drop(source, target, piece, orientation)
         engine.undo();
         return 'snapback';
       }
+
       else
       {
         //Writing last move
@@ -161,29 +166,12 @@ function drop(source, target, piece, orientation)
         //Checking if in check
         if(engine.in_check())
         {
-          moved.innerHTML = 'In check';
-        }
-
-        //Checking if in checkmate
-        else if(engine.in_checkmate())
-        {
-          moved.innerHTML = 'Checkmate!';
-        }
-
-        //Checking if in stalemate
-        else if(engine.in_draw())
-        {
-          moved.innerHTML = 'In draw';
-        }
-
-        //Checks if in 3 fold repetetion
-        else if(engine.in_threefold_repetition())
-        {
-          moved.innerHTML = 'In 3 fold repetition';
+          player.innerHTML = 'In check';
         }
 
         setTimeout(play, 200);
       }
+
     }
 
     //For 2 players
@@ -195,30 +183,29 @@ function drop(source, target, piece, orientation)
         moved.innerHTML = 'From: ' + move.from + ', To: ' + move.to;
         player.innerHTML = "Black to play";
 
-        //Checking if in check
-        if(engine.in_check())
-        {
-          moved.innerHTML = 'In check';
-        }
-
         //Checking if in checkmate
-        else if(engine.in_checkmate())
+        if(engine.in_checkmate())
         {
-          moved.innerHTML = 'Checkmate!';
+          player.innerHTML = 'Checkmate';
         }
 
         //Checking if in stalemate
         else if(engine.in_draw())
         {
-          moved.innerHTML = 'In draw';
+          player.innerHTML = 'In draw';
         }
 
         //Checks if in 3 fold repetetion
         else if(engine.in_threefold_repetition())
         {
-          moved.innerHTML = 'In 3 fold repetition';
+          player.innerHTML = 'In 3 fold repetition';
         }
 
+        //Checking if in check
+        else if(engine.in_check())
+        {
+          player.innerHTML = 'Check!';
+        }
       }
 
       //If it's black's turn to play
@@ -227,30 +214,30 @@ function drop(source, target, piece, orientation)
         moved.innerHTML = 'From: ' + move.from + ', To: ' + move.to;
         player.innerHTML = "White to play";
 
-        //Checking if in check
-        if(engine.in_check())
-        {
-          moved.innerHTML = 'In check';
-        }
-
+       
         //Checking if in checkmate
-        else if(engine.in_checkmate())
+        if(engine.in_checkmate())
         {
-          moved.innerHTML = 'Checkmate!';
+          player.innerHTML = 'Checkmate!';
         }
 
         //Checking if in stalemate
         else if(engine.in_draw())
         {
-          moved.innerHTML = 'In draw';
+          player.innerHTML = 'In draw';
         }
 
         //Checks if in 3 fold repetetion
         else if(engine.in_threefold_repetition())
         {
-          moved.innerHTML = 'In 3 fold repetition';
+          player.innerHTML = 'In 3 fold repetition';
         }
 
+        //Checking if in check
+        else if(engine.in_check())
+        {
+          player.innerHTML = 'In check';
+        }
       }
     }
   }
@@ -373,58 +360,101 @@ function getValue(x, y, pos)
 //Function to make computers play
 function play()
 {
-  if(!engine.game_over() && engine.turn() === 'w')
+  if(!engine.in_checkmate() && engine.turn() === 'w')
   {
-    //Timelag
-    var moves = engine.moves();
+    //Getting all HTML elements using DOMs
+    var move     = document.getElementById('move');
+    var searched = document.getElementById('movessearched');
+    var player   = document.getElementById('player');
+    
+    //Variables to keep track of number of moves searched
     totalmoves = 0;
     totalmovesk = 0;
     movessearched = 1;
 
+    //Finding all possible moves
+    var moves = engine.moves();
+    
     //Finding best move
     var bestmove;
     var temp = findbest(treedepth , true, -100000, 100000);
+    bestmove = temp;
 
-    var move = document.getElementById('move');
-    var searched = document.getElementById('movessearched');
+    //Displaying number of moves searched
     searched.innerHTML = movessearched;
-    var player = document.getElementById('player');
+    
+    //Displaing the move 
     move.innerHTML = temp.move;
+
+    //Displaying player turn
     player.innerHTML = "Black to play";
 
     //Checking if in checkmate
     if(engine.in_checkmate())
     {
-      move.innerHTML = 'Checkmate';
-    }
-
-    //Checking if in check
-    else if(engine.in_check())
-    {
-      move.innerHTML = 'In check';
+      player.innerHTML = 'Checkmate';
     }
 
     //Checking if in stalemate
     else if(engine.in_draw())
     {
-      move.innerHTML = 'Stalemate';
+      player.innerHTML = 'Stalemate';
     }
 
     //Checks if in 3 fold repetetion
     else if(engine.in_threefold_repetition())
     {
-      move.innerHTML = 'Stalemate due to 3 fold repetition';
+      player.innerHTML = 'Stalemate due to 3 fold repetition';
     }
 
+    //Checking if in check
+    else if(engine.in_check())
+    {
+      player.innerHTML = 'In check';
+    }
 
-    bestmove = temp;
-
-    //Doing the best move
+    //Updating the engine
     engine.move(bestmove.move);
+
+    //Checking if the player can do anymore moves or has he lost
+    let player_moves = engine.moves();
+    let player_lose  = true;
+    for(let i = 0; i < player_moves.length; ++i)
+    {
+      if(engine.move(player_moves[i]))
+      {
+        //Un-doing the move
+        engine.undo();
+        player_lose = false;
+        break;
+      }
+    }
+
+    //If he can't do anymoves, then evaluating his position
+    if(player_lose === true)
+    {
+      //If he is checkmated
+      if(engine.in_checkmate())
+      {
+        player.innerHTML = 'You lose bruh!! Get wrecked!!';
+      }
+      //If player has drawn
+      else if(engine.in_draw())
+      {
+        player.innerHTML = "It's a draw but I'll get you next time bugger";
+      }
+      else if(engine.in_threefold_repetition())
+      {
+        player.innerHTML = "You're scared of me, aren't you! It's a draw this time but I'll get you in the next one";
+      }
+    }
+
+    //Updating the rendering of the board
     config.position = getfen(engine.fen());
     board = ChessBoard('board', config);
   }
-  else if(engine.game_over() === true)
+
+  else if(engine.in_checkmate() === true)
   {
     console.log('Game Over');
   }
