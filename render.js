@@ -192,7 +192,7 @@ function drop(source, target, piece, orientation)
         //Checking if in stalemate
         else if(engine.in_draw())
         {
-          player.innerHTML = 'In draw';
+          player.innerHTML = 'Draw Game';
         }
 
         //Checks if in 3 fold repetetion
@@ -224,7 +224,7 @@ function drop(source, target, piece, orientation)
         //Checking if in stalemate
         else if(engine.in_draw())
         {
-          player.innerHTML = 'In draw';
+          player.innerHTML = 'Draw Game';
         }
 
         //Checks if in 3 fold repetetion
@@ -520,7 +520,7 @@ function findbest(depth, Maxplayer, alpha, beta)
 
 
         //Finding best score for maximiser
-        if(score.score > best)
+        if(score.score >= best)
         {
           best = score.score;
           bestindex = i;
@@ -578,7 +578,7 @@ function findbest(depth, Maxplayer, alpha, beta)
         engine.undo();
 
         //Finding worst score for minimiser
-        if(score.score < worst)
+        if(score.score <= worst)
         {
           worst = score.score;
           worstindex = i;
